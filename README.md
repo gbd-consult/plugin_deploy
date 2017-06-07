@@ -1,2 +1,3 @@
 # plugin_deploy
-Deploy QGIS plugins to a repository 
+
+Bereitstellung eines QGIS Plugins über ein QGIS Plugin Repository 
