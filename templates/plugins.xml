@@ -1,0 +1,30 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<?xml-stylesheet type='text/xsl' href='{{ url_for('static', filename='plugins.xsl') }}' ?>
+<plugins>
+    {% for p in plugins %}
+    <pyqgis_plugin name='{{ p.name }}' version='{{ p.version }}' plugin_id='{{ p.id }}'>
+            <description><![CDATA[ {{ p.description }} ]]></description>
+            <about></about>
+            <version>{{ p.version }}</version>
+            <trusted>False</trusted>
+            <qgis_minimum_version>{{ p.min_qgis_version }}</qgis_minimum_version>
+            <qgis_maximum_version>{{ p.max_qgis_version }}</qgis_maximum_version>
+            <homepage><![CDATA[ {{ p.homepage }} ]]></homepage>
+            <file_name>{{ p.filename }}</file_name>
+            <icon></icon>
+            <author_name><![CDATA[ {{ p.author }} ]]></author_name>
+            <download_url><![CDATA[ {{ p.download_url }} ]]></download_url>
+            <uploaded_by><![CDATA[ {{ p.uploader }} ]]></uploaded_by>
+            <create_date>{{ p.create_date }}</create_date>
+            <update_date>{{ p.update_date }}</update_date>
+            <experimental>True</experimental>
+            <deprecated>False</deprecated>
+            <tracker><![CDATA[]]></tracker>
+            <repository><![CDATA[https://github.com/sergey-bastrakov/Acca_Plugin]]></repository>
+            <tags><![CDATA[test]]></tags>
+            <downloads>11908</downloads>
+            <average_vote>3.90891323122</average_vote>
+            <rating_votes>22</rating_votes>
+    </pyqgis_plugin>
+{% endfor %}
+</plugins>
