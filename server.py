@@ -68,11 +68,13 @@ def event_handler():
             print entry
             db.execute('''
                 INSERT INTO plugins
-                (name, version, description, qgis_minimum_version, qgis_maximum_version,
+                (name, version, version_major, version_minor, version_revision,
+                description, qgis_minimum_version, qgis_maximum_version,
                 homepage, file_name, author_name, download_url, uploaded_by,
                 create_date, update_date, experimental)
                 VALUES
-                (:name, :version, :description, :qgis_minimum_version, :qgis_maximum_version,
+                (:name, :version, :version_major, :version_minor, :version_revision,
+                :description, :qgis_minimum_version, :qgis_maximum_version,
                 :homepage, :file_name, :author_name, :download_url, :uploaded_by,
                 :create_date, :update_date, :experimental)
                 ''', entry)
@@ -83,12 +85,14 @@ def event_handler():
     else:
         return "invalid request"
 
-@app.route('/plugins_dev.xml')
+@app.route('/plugins.xml')
 def show_plugin_list():
     """Generate XML with plugins"""
     db = get_db()
     cur = db.execute('SELECT * FROM plugins')
     plugins = cur.fetchall()
+    selection = request.args.get('selection')
+    plugins = get_plugin_selection(plugins, selection = selection)
     root = etree.Element('plugins')
     for p in plugins:
         child = etree.Element('pyqgis_plugin', name = p.get('name'), version = p.get('version'))
@@ -103,23 +107,36 @@ def show_plugin_list():
     response.headers['Content-Type'] = 'application/xml'
     return response
 
-@app.route('/plugin_list.html')
+@app.route('/plugins.html')
 def show_plugins():
     """Display the list of available plugins"""
     db = get_db()
     cur = db.execute('SELECT * FROM plugins')
     plugins = cur.fetchall()
+    selection = request.args.get('selection')
+    plugins = get_plugin_selection(plugins, selection = selection)
     template = render_template('plugins.html', plugins = plugins)
     response = make_response(template)
     return response
 
-@app.route('/plugins_test.xml')
-def test_plugins():
-    with open('testplugins.xml', 'r') as f:
-        data = f.read()
-    response = make_response(data)
-    response.headers['Content-Type'] = 'application/xml'
-    return response
+def get_plugin_selection(plugins, selection):
+    """Extract the latest version of each plugin"""
+    if not selection in ['last','latest']:
+        return plugins
+    res = []
+    # for every distinct plugin name
+    for name in set(map(lambda x: x.get('name'), plugins)):
+        pl_name = filter(lambda x: x.get('name') == name, plugins)
+        pl_sorted = sorted(pl_name, key =
+                lambda k: (k.get('version_major'), k.get('version_minor'), k.get('version_revision')))
+        if selection == 'latest':
+            res.append(pl_sorted.pop())
+        if selection == 'last':
+            if len(pl_sorted) > 1:
+                res.append(pl_sorted[len(pl_sorted) - 2])
+            else:
+                res.append(pl_sorted.pop())
+    return res
 
 if __name__ == '__main__':
     app.run()
